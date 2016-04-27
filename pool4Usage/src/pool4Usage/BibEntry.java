@@ -18,6 +18,16 @@ public class BibEntry {
 		this.ipv4_l4id = ipv4_l4id;
 		this.isStatic = isStatic;
 	}
+	public BibEntry(String currentRow){
+		String splitCsvBy = ",";
+		String[] bibRow = currentRow.split(splitCsvBy);
+		this.protocol = bibRow[0];
+		this.ipv6_address = bibRow[1];
+		this.ipv6_l4id = bibRow[2];
+		this.ipv4_address = bibRow[3];
+		this.ipv4_l4id = Integer.parseInt(bibRow[4]);
+		this.isStatic = Integer.parseInt(bibRow[5]);
+	}
 
 	public String getProtocol() {
 		return protocol;

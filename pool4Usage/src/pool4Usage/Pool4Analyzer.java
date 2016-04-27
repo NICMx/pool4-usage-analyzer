@@ -18,9 +18,7 @@ public class Pool4Analyzer {
 			scanner = new Scanner(process.getInputStream());
 			while (scanner.hasNext()) {
 				String currentRow = scanner.nextLine();
-				String[] pool4Row = currentRow.split(splitCsvBy);
-				Pool4Entry pool4entry = new Pool4Entry(pool4Row[0], pool4Row[1], pool4Row[2],
-						Integer.parseInt(pool4Row[3]), Integer.parseInt(pool4Row[4]));
+				Pool4Entry pool4entry = new Pool4Entry(currentRow);
 				pool4Data.add(pool4entry);
 			}
 		} finally {
@@ -32,9 +30,7 @@ public class Pool4Analyzer {
 			scanner = new Scanner(process.getInputStream());
 			while (scanner.hasNext()) {
 				String currentRow = scanner.nextLine();
-				String[] bibRow = currentRow.split(splitCsvBy);
-				BibEntry bibentry = new BibEntry(bibRow[0], bibRow[1], bibRow[2], bibRow[3],
-						Integer.parseInt(bibRow[4]), Integer.parseInt(bibRow[5]));
+				BibEntry bibentry = new BibEntry(currentRow);
 				bibData.add(bibentry);
 			}
 		} finally {
@@ -63,7 +59,6 @@ public class Pool4Analyzer {
 		}
 
 	}
-
 	public static void quickSort(ArrayList<Pool4Entry> data, int low, int high) {
 		if (data.size() == 0)
 			return;

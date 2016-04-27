@@ -16,6 +16,15 @@ public class Pool4Entry {
 		this.min_port = min_port;
 		this.max_port = max_port;
 	}
+	public Pool4Entry(String currentRow){
+		String splitCsvBy = ",";
+		String[] pool4Row = currentRow.split(splitCsvBy);
+		this.mark = pool4Row[0];
+		this.protocol = pool4Row[1];
+		this.address = pool4Row[2];
+		this.min_port = Integer.parseInt(pool4Row[3]);
+		this.max_port = Integer.parseInt(pool4Row[4]);
+	}
 
 	public String getMark() {
 		return mark;
