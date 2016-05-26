@@ -1,0 +1,9 @@
+# Java
+*.class
+
+# Eclipse
+.project
+.classpath
+.settings
+/bin/
+

@@ -1,4 +1,4 @@
-package pool4Usage;
+package mx.nic.jool.pool4.analyzer;
 
 /**
  * Pool4Entry Pool4Entry is an instance of a Pool4 Database containing all the

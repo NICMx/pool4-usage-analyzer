@@ -1,4 +1,4 @@
-package pool4Usage;
+package mx.nic.jool.pool4.analyzer;
 
 /**
  * BibEntry BibEntry is an instance of a BIB Database containing all the

@@ -1,4 +1,4 @@
-package pool4Usage;
+package mx.nic.jool.pool4.analyzer;
 
 import java.io.IOException;
 import java.util.ArrayList;
