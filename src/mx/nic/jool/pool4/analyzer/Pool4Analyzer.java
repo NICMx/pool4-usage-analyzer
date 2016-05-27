@@ -1,7 +1,6 @@
 package mx.nic.jool.pool4.analyzer;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -9,107 +8,129 @@ import java.util.Scanner;
  * in comparison with the BIB database. Each Pool4 entry will be displayed with
  * its corresponding Mark, Protocol, Total, Used and Used Percentage(Comparison
  * between Total and Used)
- * 
- * @version 1.0 (current version number of program)
- * @since 27-04-2016 (the version of the package this class was first added to)
  */
-
 public class Pool4Analyzer {
 
+	private Runtime runtime = Runtime.getRuntime();
+	private Pool4Db pool4 = new Pool4Db();
+	private int orphanBibs = 0;
+
+	public static void main(String args[]) throws IOException, InterruptedException {
+		new Pool4Analyzer().analyze();
+	}
+
+	private void analyze() throws IOException, InterruptedException {
+		loadPool4();
+		handleBib();
+		printResults();
+	}
+
 	/**
-	 * The main method is called at the moment the program is executed. Pool4
-	 * entries are read by executing the command "jool --pool4 --display --csv"
-	 * into the command line of the user. Each resulting line is analyzed, split
-	 * and stored within a Pool4Entry. This Pool4Entry will be added into the
-	 * Pool4Entry array(pool4Data).
-	 * 
-	 * BIB entries are read by executing the command
-	 * "sudo jool --bib --display --numeric --csv" into the command line of the
-	 * user. Each resulting line is analyzed, split and stored within a
-	 * BibEntry. This BibEntry will be added into the BibEntry array(bibData).
-	 * 
-	 * pool4Data array is reorganized with a quicksort algorithm DisplayData is
-	 * called and the pool4 usage will be displayed into the command line.
+	 * Returns Jool's current pool4.
 	 */
-
-	public static void main(String args[]) throws IOException {
-		ArrayList<Pool4Entry> pool4Data = new ArrayList<Pool4Entry>();
-		ArrayList<BibEntry> bibData = new ArrayList<BibEntry>();
-
-		Runtime runtime = Runtime.getRuntime();
-		Process process = runtime.exec("jool --pool4 --display --csv");
+	private Pool4Db loadPool4() throws IOException, InterruptedException {
+		String command = "cat test/pool4.output";
+		// String command = "jool --pool4 --display --csv";
+		Process process = runtime.exec(command);
 		Scanner scanner = null;
+
 		try {
 			scanner = new Scanner(process.getInputStream());
 			while (scanner.hasNext()) {
 				String currentRow = scanner.nextLine();
+
+				if (currentRow.startsWith("Mark")) {
+					continue; // Just a table header; skip.
+				}
+
 				Pool4Entry pool4entry = new Pool4Entry(currentRow);
-				pool4Data.add(pool4entry);
-			}
-		} finally {
-			if (scanner != null)
-				scanner.close();
-		}
-		try {
-			process = runtime.exec("sudo jool --bib --display --numeric --csv");
-			scanner = new Scanner(process.getInputStream());
-			while (scanner.hasNext()) {
-				String currentRow = scanner.nextLine();
-				BibEntry bibentry = new BibEntry(currentRow);
-				bibData.add(bibentry);
+				pool4.add(pool4entry);
 			}
 		} finally {
 			if (scanner != null)
 				scanner.close();
 		}
 
-		quickSort(pool4Data, 0, (pool4Data.size() - 1));
-		DisplayData display = new DisplayData();
-		display.display(pool4Data, bibData);
-
+		handleProcessError(command, process);
+		return pool4;
 	}
 
 	/**
-	 * QuickSort is called to organize Pool4Entry array. Making it incremental
-	 * in the mark
-	 * 
-	 * @param data
-	 *            Pool4Entry Array that will be sorted
-	 * @param low
-	 *            low pivot in the sorting algorithm
-	 * @param high
-	 *            high pivot in the sorting algorithm
+	 * Walks through Jool's current BIB, collecting the pool4 usage stats.
 	 */
-	public static void quickSort(ArrayList<Pool4Entry> data, int low, int high) {
-		if (data.size() == 0)
-			return;
-		if (low >= high)
-			return;
+	private void handleBib() throws IOException, InterruptedException {
+		String command = "cat test/bib.output";
+		// String command = "jool --bib --display --numeric --csv";
+		Process process = runtime.exec(command);
+		Scanner scanner = null;
 
-		int middle = low + high;
-		Pool4Entry pivot = data.get(middle);
-		String pivotValue = pivot.getMark();
-		int pivotInt = Integer.parseInt(pivotValue);
-		int i = low;
-		int j = high;
-		while (i <= j) {
-			while (Integer.parseInt(data.get(i).getMark()) < pivotInt) {
-				i++;
+		try {
+			scanner = new Scanner(process.getInputStream());
+			while (scanner.hasNext()) {
+				String currentRow = scanner.nextLine();
+
+				if (currentRow.startsWith("Protocol")) {
+					continue; // Just a table header; skip.
+				}
+
+				BibEntry bib = new BibEntry(currentRow);
+				boolean pool4EntryExists = pool4.use(bib);
+				if (!pool4EntryExists) {
+					orphanBibs++;
+				}
 			}
-			while (Integer.parseInt(data.get(j).getMark()) < pivotInt) {
-				i++;
-			}
-			if (i <= j) {
-				Pool4Entry temp = data.get(i);
-				data.set(i, data.get(j));
-				data.set(j, temp);
-				i++;
-				j++;
-			}
+		} finally {
+			if (scanner != null)
+				scanner.close();
 		}
-		if (low < j)
-			quickSort(data, low, j);
-		if (high > i)
-			quickSort(data, i, high);
+
+		handleProcessError(command, process);
 	}
+
+	/**
+	 * Waits until the command has terminated and throws exceptions if it spewed
+	 * errors.
+	 */
+	private void handleProcessError(String command, Process process) throws IOException, InterruptedException {
+		if (process.waitFor() == 0) {
+			return;
+		}
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("'").append(command).append("' threw error code ").append(process.exitValue()).append(".\n");
+		sb.append("Stderr shows:\n");
+
+		Scanner scanner = new Scanner(process.getErrorStream());
+		try {
+			while (scanner.hasNext()) {
+				sb.append(scanner.nextLine()).append("\n");
+			}
+		} finally {
+			scanner.close();
+		}
+
+		throw new IOException(sb.toString());
+	}
+
+	private void printResults() {
+		System.out.println("Mark	Proto	Total	Used	Used %");
+
+		for (Pool4Table table : pool4.getTables()) {
+			System.out.print(table.getMark());
+			System.out.print("\t");
+			System.out.print(table.getProtocol());
+			System.out.print("\t");
+			System.out.print(table.getTotalTransportAddresses());
+			System.out.print("\t");
+			System.out.print(table.getUsedTransportAddresses());
+			System.out.print("\t");
+			System.out.print(table.getUsedTransportAddresses() * 100 / table.getTotalTransportAddresses());
+			System.out.println();
+		}
+
+		System.out.println();
+		System.out.println("Orphan BIB entries: " + orphanBibs);
+	}
+
 }
