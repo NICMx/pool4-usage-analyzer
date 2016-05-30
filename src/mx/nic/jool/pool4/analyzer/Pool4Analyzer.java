@@ -29,8 +29,8 @@ public class Pool4Analyzer {
 	 * Returns Jool's current pool4.
 	 */
 	private Pool4Db loadPool4() throws IOException, InterruptedException {
-		String command = "cat test/pool4.output";
-		// String command = "jool --pool4 --display --csv";
+		// String command = "cat test/pool4.output";
+		String command = "jool --pool4 --display --csv";
 		Process process = runtime.exec(command);
 		Scanner scanner = null;
 
@@ -59,8 +59,8 @@ public class Pool4Analyzer {
 	 * Walks through Jool's current BIB, collecting the pool4 usage stats.
 	 */
 	private void handleBib() throws IOException, InterruptedException {
-		String command = "cat test/bib.output";
-		// String command = "jool --bib --display --numeric --csv";
+		// String command = "cat test/bib.output";
+		String command = "sudo jool --bib --display --numeric --csv";
 		Process process = runtime.exec(command);
 		Scanner scanner = null;
 
