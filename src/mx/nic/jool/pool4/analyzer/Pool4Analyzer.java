@@ -15,14 +15,31 @@ public class Pool4Analyzer {
 	private Pool4Db pool4 = new Pool4Db();
 	private int orphanBibs = 0;
 
+	private String joolBinary = "jool";
+	private boolean printMinimal = false;
+	
 	public static void main(String args[]) throws IOException, InterruptedException {
-		new Pool4Analyzer().analyze();
+		new Pool4Analyzer().analyze(args);
 	}
 
-	private void analyze() throws IOException, InterruptedException {
+	private void analyze(String args[]) throws IOException, InterruptedException {
+		parseArgs(args);
 		loadPool4();
 		handleBib();
 		printResults();
+	}
+
+	private void parseArgs(String args[]) {
+		for (int i = 0; i < args.length; i++) {
+			if ("--minimal".equals(args[i])) {
+				printMinimal = true;
+			} else if (i + 1 != args.length && "--jool-binary".equals(args[i])) {
+				joolBinary = args[i + 1];
+				i++;
+			} else {
+				System.err.println("I don't know what '" + args[i] + "' is; ignoring.");
+			}
+		}
 	}
 
 	/**
@@ -30,7 +47,7 @@ public class Pool4Analyzer {
 	 */
 	private Pool4Db loadPool4() throws IOException, InterruptedException {
 		// String command = "cat test/pool4.output";
-		String command = "jool --pool4 --display --csv";
+		String command = joolBinary + " --pool4 --display --csv";
 		Process process = runtime.exec(command);
 		Scanner scanner = null;
 
@@ -60,7 +77,7 @@ public class Pool4Analyzer {
 	 */
 	private void handleBib() throws IOException, InterruptedException {
 		// String command = "cat test/bib.output";
-		String command = "sudo jool --bib --display --numeric --csv";
+		String command = "sudo " + joolBinary + " --bib --display --numeric --csv";
 		Process process = runtime.exec(command);
 		Scanner scanner = null;
 
@@ -114,7 +131,9 @@ public class Pool4Analyzer {
 	}
 
 	private void printResults() {
-		System.out.println("Mark	Proto	Total	Used	Used %");
+		if (!printMinimal) {
+			System.out.println("Mark	Proto	Total	Used	Used %");
+		}
 
 		for (Pool4Table table : pool4.getTables()) {
 			System.out.print(table.getMark());
@@ -129,8 +148,10 @@ public class Pool4Analyzer {
 			System.out.println();
 		}
 
-		System.out.println();
-		System.out.println("Orphan BIB entries: " + orphanBibs);
+		if (!printMinimal) {
+			System.out.println();
+			System.out.println("Orphan BIB entries: " + orphanBibs);
+		}
 	}
 
 }

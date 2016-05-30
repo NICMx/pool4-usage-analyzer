@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Reports the utilization of Jool's pool4 mark-protocol combinations. The point is to monitor this data to prevent exhaustion.
+Reports the utilization of [Jool](https://github.com/NICMx/Jool)'s pool4 mark-protocol combinations. The point is to monitor this data to prevent exhaustion.
 
 ## Installation
 
@@ -45,17 +45,20 @@ You can finally try the analyzer: (Your output is going to be significantly more
 	
 	Orphan BIB entries: 1
 
-That's all the jar does; you want to monitor this table.
+Internally, the jar runs `jool --pool4 --display --csv` and `sudo jool --bib --display --numeric --csv`, compares the output and reports pool4's utilization. That's all the jar does; you want to monitor this table.
 
 One way to accomplish that is to create a cron job that will whine when one or more of the usage ratios are too high.
+
+Adapt this to your needs:
 
 `/home/potato/check-jool.sh`:
 
 	#!/bin/bash
 	
-	java -jar pool4-usage-analyzer-<version>.jar | while read line
+	java -jar pool4-usage-analyzer-<version>.jar --raw | while read line
 	do
-		usage=$(echo $line | awk '{ print $5 }') 
+		usage=$(echo $line | awk '{ print $5 }')
+		# If there's more than 75% utilization...
 		if [[ "$usage" -gt 75 ]]
 		then
 			echo "pool4 usage is too high: $line"
@@ -66,3 +69,19 @@ One way to accomplish that is to create a cron job that will whine when one or m
 
 	MAILTO="alert@example.mx"
 	*/5 * * * * /home/potato/check-jool.sh > /dev/null 2>&1
+
+## Arguments
+
+### `--minimal`
+
+Omits the table header and the orphan entry count from the output.
+
+### `--jool-binary`
+
+By default the analyzer assumes it can find the `jool` userspace application in `PATH` so it simply runs it prefixless. If `jool` is somewhere else, you can let the analyzer know by including
+
+	--jool-binary <path-to-jool-binary>
+
+For example:
+
+	java -jar pool4-usage-analyzer-<version>.jar --jool-binary /usr/local/bin/jool
