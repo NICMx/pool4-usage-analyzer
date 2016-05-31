@@ -35,13 +35,13 @@ Then open a new terminal (so your previous sudo password "times out") and make s
 You can finally try the analyzer: (Your output is going to be significantly more boring if pool4 hasn't been populated)
 
 	$ java -jar pool4-usage-analyzer-<version>.jar
-	Mark	Proto	Total	Used	Used %
-	2	TCP	4	1	25
-	1	TCP	4	3	75
-	2	UDP	12	8	66
-	1	UDP	6	6	100
-	2	ICMP	6	0	0
-	1	ICMP	6	1	16
+	Mark    Proto   Total   Used    Used %
+	2       TCP     4       1       25
+	1       TCP     4       3       75
+	2       UDP     12      8       66
+	1       UDP     6       6       100
+	2       ICMP    6       0       0
+	1       ICMP    6       1       16
 	
 	Orphan BIB entries: 1
 
