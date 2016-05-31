@@ -1,6 +1,8 @@
 package mx.nic.jool.pool4.analyzer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -9,6 +11,15 @@ import java.util.List;
  * This is the whole output of `jool -4`.
  */
 public class Pool4Db {
+
+	/**
+	 * Indexes the entries of all the tables by address for by-address lookups
+	 * as opposed to mark-proto lookups.
+	 * 
+	 * This makes the analysis more like O(m + n) instead of O(m * n). (m is
+	 * number of pool4 entries and n is number of BIB entries.)
+	 */
+	private HashMap<AddressProtocolTuple, List<Pool4Entry>> map = new HashMap<AddressProtocolTuple, List<Pool4Entry>>();
 
 	/** The tables. */
 	private List<Pool4Table> pool4 = new ArrayList<Pool4Table>();
@@ -23,11 +34,24 @@ public class Pool4Db {
 		for (Pool4Table table : pool4) {
 			if (table.matches(entry)) {
 				table.add(entry);
+				addToMap(entry);
 				return;
 			}
 		}
 
 		pool4.add(new Pool4Table(entry));
+		addToMap(entry);
+	}
+
+	private void addToMap(Pool4Entry entry) {
+		AddressProtocolTuple key = new AddressProtocolTuple(entry);
+		List<Pool4Entry> list = map.get(key);
+		if (list == null) {
+			list = new LinkedList<Pool4Entry>();
+			map.put(key, list);
+		}
+
+		list.add(entry);
 	}
 
 	/**
@@ -41,9 +65,14 @@ public class Pool4Db {
 	public boolean use(BibEntry bib) {
 		boolean used = false;
 
-		for (Pool4Table table : pool4) {
-			if (table.contains(bib)) {
-				table.use();
+		List<Pool4Entry> list = map.get(new AddressProtocolTuple(bib));
+		if (list == null) {
+			return false;
+		}
+
+		for (Pool4Entry entry : list) {
+			if (entry.getRange().containsPort(bib.getAddress4().getPort())) {
+				entry.getTable().use();
 				used = true;
 			}
 		}

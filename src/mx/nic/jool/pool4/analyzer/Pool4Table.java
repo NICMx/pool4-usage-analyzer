@@ -31,7 +31,7 @@ public class Pool4Table {
 		mark = entry.getMark();
 		protocol = entry.getProtocol();
 		entries = new ArrayList<Pool4Entry>();
-		entries.add(entry);
+		add(entry);
 	}
 
 	/**
@@ -56,6 +56,7 @@ public class Pool4Table {
 	 */
 	public void add(Pool4Entry entry) {
 		entries.add(entry);
+		entry.setTable(this);
 	}
 
 	/**
@@ -67,26 +68,6 @@ public class Pool4Table {
 	 */
 	public boolean matches(Pool4Entry entry) {
 		return mark == entry.getMark() && protocol == entry.getProtocol();
-	}
-
-	/**
-	 * Was `bib` borrowed from this table?
-	 * 
-	 * @param bib
-	 *            Candidate.
-	 * @return Whether Jool borrowed `bib` from this table.
-	 */
-	public boolean contains(BibEntry bib) {
-		if (protocol != bib.getProtocol())
-			return false;
-
-		for (Pool4Entry entry : entries) {
-			if (entry.getRange().contains(bib.getAddress4())) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**

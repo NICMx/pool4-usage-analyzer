@@ -66,19 +66,14 @@ public class Pool4Range {
 	}
 
 	/**
-	 * Does this range contain `transportAddress`?
+	 * Does this range contain `port`?
 	 * 
-	 * @param transportAddress
-	 *            transport address you want to test.
-	 * @return whether this range contains `transportAddress`.
+	 * @param port
+	 *            port number you want to test.
+	 * @return whether this range contains `port`.
 	 */
-	public boolean contains(TransportAddress transportAddress) {
-		if (!address.equals(transportAddress.getAddress()))
-			return false;
-		if (transportAddress.getPort() < portMin || portMax < transportAddress.getPort())
-			return false;
-
-		return true;
+	public boolean containsPort(int port) {
+		return portMin <= port && port <= portMax;
 	}
 
 	@Override

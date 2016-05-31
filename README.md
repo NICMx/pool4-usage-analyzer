@@ -36,12 +36,12 @@ You can finally try the analyzer: (Your output is going to be significantly more
 
 	$ java -jar pool4-usage-analyzer-<version>.jar
 	Mark	Proto	Total	Used	Used %
-	1	TCP	6	3	50
-	2	TCP	6	1	16
-	1	UDP	6	6	100
+	2	TCP	4	1	25
+	1	TCP	4	3	75
 	2	UDP	12	8	66
-	1	ICMP	6	1	16
+	1	UDP	6	6	100
 	2	ICMP	6	0	0
+	1	ICMP	6	1	16
 	
 	Orphan BIB entries: 1
 
@@ -55,11 +55,11 @@ Adapt this to your needs:
 
 	#!/bin/bash
 	
-	java -jar pool4-usage-analyzer-<version>.jar --raw | while read line
+	java -jar pool4-usage-analyzer-<version>.jar --minimal | while read line
 	do
 		usage=$(echo $line | awk '{ print $5 }')
-		# If there's more than 75% utilization...
-		if [[ "$usage" -gt 75 ]]
+		# If there's at least 75% utilization...
+		if [[ "$usage" -ge 75 ]]
 		then
 			echo "pool4 usage is too high: $line"
 		fi
@@ -85,3 +85,10 @@ By default the analyzer assumes it can find the `jool` userspace application in 
 For example:
 
 	java -jar pool4-usage-analyzer-<version>.jar --jool-binary /usr/local/bin/jool
+
+
+## Legal & Credits
+
+GPLv3.
+
+Funded & developed by NIC Mexico.

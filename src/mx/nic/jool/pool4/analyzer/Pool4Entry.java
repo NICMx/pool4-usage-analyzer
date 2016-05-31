@@ -17,6 +17,8 @@ public class Pool4Entry {
 	private Protocol protocol;
 	/** The potential masks. */
 	private Pool4Range range;
+	/** Quick accesor to the table that contaits this entry. */
+	private Pool4Table table;
 
 	/**
 	 * Creates a {@link Pool4Entry} out of `jool --pool4`'s CSV table output.
@@ -58,6 +60,20 @@ public class Pool4Entry {
 	 */
 	public Pool4Range getRange() {
 		return range;
+	}
+
+	/**
+	 * @see #table
+	 */
+	public Pool4Table getTable() {
+		return table;
+	}
+
+	/**
+	 * @see #table
+	 */
+	protected void setTable(Pool4Table table) {
+		this.table = table;
 	}
 
 	@Override

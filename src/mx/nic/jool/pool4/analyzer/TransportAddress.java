@@ -16,6 +16,10 @@ public class TransportAddress {
 	 */
 	private int port;
 
+	/**
+	 * @see #address
+	 * @see #port
+	 */
 	public TransportAddress(InetAddress address, int port) {
 		this.address = address;
 		this.port = port;
