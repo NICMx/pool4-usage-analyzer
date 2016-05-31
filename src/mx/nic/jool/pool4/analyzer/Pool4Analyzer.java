@@ -11,13 +11,18 @@ import java.util.Scanner;
  */
 public class Pool4Analyzer {
 
+	/** Thingo Java provides so we can run commands as if we were a console. */
 	private Runtime runtime = Runtime.getRuntime();
+	/** The output of `jool -4`, parsed and loaded into memory. */
 	private Pool4Db pool4 = new Pool4Db();
+	/** BIB entries that don't belong to any pool4 entries. */
 	private int orphanBibs = 0;
 
+	/** Name of the `jool` binary. The user can rename it. */
 	private String joolBinary = "jool";
+	/** Do not print table header and {@link #orphanBibs}? */
 	private boolean printMinimal = false;
-	
+
 	public static void main(String args[]) throws IOException, InterruptedException {
 		new Pool4Analyzer().analyze(args);
 	}
@@ -29,6 +34,9 @@ public class Pool4Analyzer {
 		printResults();
 	}
 
+	/**
+	 * Parses program arguments, configuring this object.
+	 */
 	private void parseArgs(String args[]) {
 		for (int i = 0; i < args.length; i++) {
 			if ("--minimal".equals(args[i])) {
@@ -43,9 +51,9 @@ public class Pool4Analyzer {
 	}
 
 	/**
-	 * Returns Jool's current pool4.
+	 * Loads Jool's current pool4 into {@link #pool4}.
 	 */
-	private Pool4Db loadPool4() throws IOException, InterruptedException {
+	private void loadPool4() throws IOException, InterruptedException {
 		// String command = "cat test/pool4.output";
 		String command = joolBinary + " --pool4 --display --csv";
 		Process process = runtime.exec(command);
@@ -69,7 +77,6 @@ public class Pool4Analyzer {
 		}
 
 		handleProcessError(command, process);
-		return pool4;
 	}
 
 	/**
@@ -130,6 +137,9 @@ public class Pool4Analyzer {
 		throw new IOException(sb.toString());
 	}
 
+	/**
+	 * Prints the information gathered by the other methods.
+	 */
 	private void printResults() {
 		if (!printMinimal) {
 			System.out.println("Mark	Proto	Total	Used	Used %");
